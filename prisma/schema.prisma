@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id            Int      @id
+  name          String
+  availableDays String[] // e.g. ["Monday", "Tuesday"]
+  slots         Slot[]
+}
+
+model Slot {
+  id              Int               @id @default(autoincrement())
+  product         Product           @relation(fields: [productId], references: [id])
+  productId       Int
+  startDate       DateTime
+  startTime       String
+  endTime         String
+  providerSlotId  String            @unique
+  currencyCode    String
+  variantId       Int
+  remaining       Int
+  paxAvailability PaxAvailability[]
+}
+
+model PaxAvailability {
+  id          Int     @id @default(autoincrement())
+  slot        Slot    @relation(fields: [slotId], references: [id])
+  slotId      Int
+  type        String
+  name        String?
+  description String?
+  min         Int?
+  max         Int?
+  remaining   Int
+  price       Price   @relation(fields: [priceId], references: [id])
+  priceId     Int
+}
+
+model Price {
+  id              Int               @id @default(autoincrement())
+  finalPrice      Float
+  originalPrice   Float
+  currencyCode    String
+  paxAvailability PaxAvailability[] // reverse relation
+}
