@@ -11,7 +11,7 @@ export class SchedulerService {
     private readonly prisma: PrismaService,
   ) {}
 
-  private async rateLimitedFetch(productIds: number[], days: number) {
+  public async rateLimitedFetch(productIds: number[], days: number) {
     const tasks: (() => Promise<void>)[] = [];
   
     for (const productId of productIds) {
