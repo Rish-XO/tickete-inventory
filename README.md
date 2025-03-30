@@ -1,98 +1,119 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Tickete Inventory Sync Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A NestJS + Prisma-based backend to integrate and sync external product inventory from Tickete's API with PostgreSQL, complete with rate-limited fetching, scheduled jobs, and normalized data models.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## 🚀 Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- ✅ Sync inventory from Tickete partner API (Product IDs: 14, 15)
+- ✅ Rate-limited API fetch (30 requests per minute safe zone)
+- ✅ Scheduled syncing every:
+  - 15 minutes (for today)
+  - 4 hours (for next 7 days)
+  - 1 day (for next 30 days)
+- ✅ Manual sync API for dev/ops
+- ✅ Fully normalized Postgres schema
+- ✅ Two output APIs:
+  - `/experience/:id/slots?date=...`
+  - `/experience/:id/dates`
 
-## Project setup
+---
 
-```bash
-$ npm install
-```
+## 🧱 Tech Stack
 
-## Compile and run the project
+- **NestJS** (Modular backend framework)
+- **Prisma** (ORM for PostgreSQL)
+- **PostgreSQL** (Database)
+- **Axios** (HTTP client)
+- **@nestjs/schedule** (Cron jobs)
+- **date-fns** (Date utilities)
 
-```bash
-# development
-$ npm run start
+---
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
+## 📦 Setup Instructions
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+git clone <repo-url>
+cd tickete-inventory
+npm install
+cp .env.example .env # set your DATABASE_URL here
+npx prisma generate
+npx prisma migrate dev --name init
+npx ts-node prisma/seed.ts # seeds Product IDs 14 and 15
+npm run start:dev
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## 🌐 Available APIs
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
+### 1. GET Slots (for specific date)
 ```
+GET /api/v1/experience/:id/slots?date=YYYY-MM-DD
+```
+Returns all slots available for a product on a given date.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 2. GET Available Dates (for 2 months)
+```
+GET /api/v1/experience/:id/dates
+```
+Returns all dates with availability and starting price.
 
-## Resources
+### 3. POST Manual Sync (Optional)
+```
+POST /api/v1/sync?days=7
+```
+Triggers a manual rate-limited sync for the next X days.
 
-Check out a few resources that may come in handy when working with NestJS:
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## 🔁 Cron-Based Syncing
 
-## Support
+- **Every 15 minutes** → sync inventory for **today**
+- **Every 4 hours** → sync inventory for **next 7 days**
+- **Daily at midnight** → sync inventory for **next 30 days**
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+---
 
-## Stay in touch
+## ⛔ Rate Limit Handling
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- API allows 30 requests per minute (30rpm)
+- Custom rate limiter adds a `~2200ms delay` between requests
+- Ensures compliance even at scale (450 products × 30 days = 13,500 requests spread safely)
 
-## License
+---
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 📚 Optimizations & Scale Readiness
+
+- ✅ Rate-limit-safe `rateLimitedFetch()` logic using async delays
+- ✅ Normalized DB schema with relational mapping for slot, pax, and price
+- ✅ Product-level scheduling enables per-product scaling
+- ✅ Pluggable cron system (can be replaced with Redis Queue like BullMQ)
+- ✅ Option to expose `/sync/pause` & `/sync/resume` APIs for ops control (future work)
+
+---
+
+## 🧪 Sample Data
+
+Pre-seeded Products:
+- `Product 14`: Monday–Wednesday, Multi-time-slot, Pax: Adult, Child
+- `Product 15`: Sunday only, Single time-slot, Pax: Adult, Child, Infant
+
+---
+
+## ✅ To-Do / Future Improvements
+
+- [ ] Redis-backed task queue (BullMQ)
+- [ ] Admin panel to view sync logs
+- [ ] Swagger API Docs
+- [ ] Dynamic product onboarding endpoint
+- [ ] Pause/resume toggle for scheduled jobs
+
+---
+
+## 🧑‍💻 Author
+Built by Rishal AT, Software Engineer.
+
+---
+
