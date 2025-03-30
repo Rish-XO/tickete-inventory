@@ -4,6 +4,7 @@ import { InventoryController } from './inventory.controller';
 
 @Module({
   providers: [InventoryService],
-  controllers: [InventoryController]
+  controllers: [InventoryController],
+  exports: [InventoryService],
 })
 export class InventoryModule {}
