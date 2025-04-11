@@ -10,7 +10,7 @@ A NestJS + Prisma-based backend to integrate and sync external product inventory
 - ✅ Rate-limited API fetch (30 requests per minute safe zone)
 - ✅ Scheduled syncing every:
   - 15 minutes (for today)
-  - 4 hours (for next 7 days)
+  - 4 hours (for next 7 days) 
   - 1 day (for next 30 days)
 - ✅ Manual sync API for dev/ops
 - ✅ Fully normalized Postgres schema
